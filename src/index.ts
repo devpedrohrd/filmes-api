@@ -3,9 +3,12 @@ import { Hono } from "hono";
 import { PrismaService } from "./config/PrismaService.js";
 import { type Context } from "hono";
 import { fetchMovies } from "./config/fetchMovies.js";
+import { cors } from "hono/cors";
 
 const app = new Hono();
 const prismaService = new PrismaService();
+
+app.use("*", cors({ origin: "http://localhost:8081" }));
 
 app.post("/rdbms", async (c: Context) => {
   const { original_title } = await c.req.json();
@@ -14,40 +17,40 @@ app.post("/rdbms", async (c: Context) => {
     return c.text("Missing required fields", 400);
   }
 
-  const movies = await fetchMovies(original_title);
+  const reviews = await fetchMovies(original_title);
 
-  if (movies.message) {
-    return c.text(movies.message, 404);
+  if (reviews.message) {
+    return c.text(reviews.message, 404);
   }
 
-  return c.json(movies);
+  return c.json(reviews);
 });
 
-app.get("/filmes", async (c: Context) => {
+app.get("/reviews", async (c: Context) => {
   const filmes = await prismaService.filmes.findMany();
 
   if (filmes.length === 0) {
-    return c.text("No movies found", 404);
+    return c.text("No reviews found", 404);
   }
 
   return c.json(filmes);
 });
 
-app.post("/filmes", async (c: Context) => {
+app.post("/reviews", async (c: Context) => {
   const { original_title, description, vote_average } = await c.req.json();
 
   if (!original_title || !description || !vote_average) {
     return c.text("Missing required fields", 400);
   }
 
-  const existingMovie = await prismaService.filmes.findFirst({
+  const existingReview = await prismaService.filmes.findFirst({
     where: {
       original_title,
     },
   });
 
-  if (existingMovie) {
-    return c.text("Movie already exists", 400);
+  if (existingReview) {
+    return c.text("Review already exists", 400);
   }
 
   const filme = await prismaService.filmes.create({
@@ -61,21 +64,21 @@ app.post("/filmes", async (c: Context) => {
   return c.json(filme);
 });
 
-app.put("/filmes/:id", async (c: Context) => {
+app.put("/reviews/:id", async (c: Context) => {
   const { id } = c.req.param();
 
   if (!id || !/^\d+$/.test(id)) {
     return c.text("Invalid or missing ID", 400);
   }
 
-  const existingMovie = await prismaService.filmes.findFirst({
+  const existingReview = await prismaService.filmes.findFirst({
     where: {
       id: Number(id),
     },
   });
 
-  if (!existingMovie) {
-    return c.text("Movie not found", 404);
+  if (!existingReview) {
+    return c.text("Review not found", 404);
   }
 
   const { original_title, description, vote_average } = await c.req.json();
@@ -86,7 +89,7 @@ app.put("/filmes/:id", async (c: Context) => {
 
   const filme = await prismaService.filmes.update({
     where: {
-      id: existingMovie.id,
+      id: existingReview.id,
     },
     data: {
       original_title,
@@ -98,37 +101,36 @@ app.put("/filmes/:id", async (c: Context) => {
   return c.json(filme);
 });
 
-app.delete("/filmes/:id", async (c: Context) => {
+app.delete("/reviews/:id", async (c: Context) => {
   const { id } = c.req.param();
 
   if (!id || !/^\d+$/.test(id)) {
     return c.text("Invalid or missing ID", 400);
   }
-  ("");
 
-  const existingMovie = await prismaService.filmes.findFirst({
+  const existingReview = await prismaService.filmes.findFirst({
     where: {
       id: Number(id),
     },
   });
 
-  if (!existingMovie) {
-    return c.text("Movie not found", 404);
+  if (!existingReview) {
+    return c.text("Review not found", 404);
   }
 
   await prismaService.filmes.delete({
     where: {
-      id: existingMovie.id,
+      id: existingReview.id,
     },
   });
 
-  return c.text("Movie deleted successfully");
+  return c.text("Review deleted successfully");
 });
 
 serve(
   {
     fetch: app.fetch,
-    port: 3000,
+    port: 3333,
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
