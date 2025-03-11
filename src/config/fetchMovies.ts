@@ -3,13 +3,13 @@ export const fetchMovies = async (query: string) => {
     query
   )}&language=pt-BR&page=1&region=pt`;
 
-  const token = process.env.TMDB_API_KEY;
+  const token: string = process.env.TMDB_API_KEY!;
 
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization: `Bearer ${token?.toString()}`,
+      Authorization: `Bearer ${token.toString()}`,
     },
   };
 
@@ -23,6 +23,7 @@ export const fetchMovies = async (query: string) => {
 
     const movies = json.results.map((movie: any) => ({
       original_title: movie.original_title,
+      poster_path: movie.poster_path,
       overview: movie.overview,
       vote_average: movie.vote_average,
     }));
