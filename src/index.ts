@@ -127,14 +127,7 @@ app.delete("/reviews/:id", async (c: Context) => {
   return c.text("Review deleted successfully");
 });
 
-serve(
-  {
-    fetch: app.fetch,
-    port: Number(process.env.PORT) || 3000,
-  },
-  (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
-  }
-);
-
-export default app;
+export default {
+  port: process.env.PORT || 3000,
+  fetch: app.fetch,
+};
