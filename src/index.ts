@@ -8,7 +8,7 @@ import { cors } from "hono/cors";
 const app = new Hono();
 const prismaService = new PrismaService();
 
-app.use("*", cors({ origin: "http://localhost:8081" }));
+app.use("*", cors({ origin: "http://localhost:8080" }));
 
 app.post("/rdbms", async (c: Context) => {
   const { original_title } = await c.req.json();
@@ -136,3 +136,5 @@ serve(
     console.log(`Server is running on http://localhost:${info.port}`);
   }
 );
+
+export default app;
