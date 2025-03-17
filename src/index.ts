@@ -6,6 +6,7 @@ import { fetchMovies } from "./config/fetchMovies.js";
 import { cors } from "hono/cors";
 
 const app = new Hono();
+const port = parseInt(process.env.PORT || "") || 3000;
 const prismaService = new PrismaService();
 
 app.use("*", cors({ origin: "http://localhost:8080" }));
@@ -127,7 +128,9 @@ app.delete("/reviews/:id", async (c: Context) => {
   return c.text("Review deleted successfully");
 });
 
-export default {
-  port: process.env.PORT || 3000,
+serve({
   fetch: app.fetch,
-};
+  port,
+});
+
+export default app;
