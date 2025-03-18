@@ -9,7 +9,7 @@ const app = new Hono();
 const port = parseInt(process.env.PORT || "") || 3000;
 const prismaService = new PrismaService();
 
-app.use("*", cors({ origin: "http://localhost:8080" }));
+app.use("*", cors({ origin: "http://localhost:8081" }));
 
 app.post("/rdbms", async (c: Context) => {
   const { original_title } = await c.req.json();
